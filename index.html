@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sala de Color · Contra el Huracán</title>
+<style>
+  :root {
+    --bg: #0d0d0e;
+    --surface: #111112;
+    --surface-alt: #0f0f10;
+    --border: #2a2a2c;
+    --border-subtle: #1e1e20;
+    --border-faint: #181818;
+    --text: #e8e0d0;
+    --text-mid: #888;
+    --text-dim: #555;
+    --text-faint: #333;
+    --text-ghost: #252525;
+    --accent: #f0a030;
+    --accent-text: #0d0d0e;
+    --strike: #3a3a3a;
+    --input-bg: #0d0d0e;
+    --error: #e05050;
+    --ok-bg: #0a1a0a;
+    --ok-text: #50c050;
+  }
+  .light {
+    --bg: #f5f0e8;
+    --surface: #faf7f2;
+    --surface-alt: #f0ebe0;
+    --border: #d8cfc0;
+    --border-subtle: #e0d8cc;
+    --border-faint: #ede7dc;
+    --text: #1a1612;
+    --text-mid: #5a5248;
+    --text-dim: #8a7e72;
+    --text-faint: #b0a898;
+    --text-ghost: #d0c8bc;
+    --accent: #c07010;
+    --accent-text: #ffffff;
+    --strike: #c0b8b0;
+    --input-bg: #ede8e0;
+    --error: #c03030;
+    --ok-bg: #eaf5ea;
+    --ok-text: #207020;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background .3s, color .3s;
+  }
+  /* Header */
+  #header {
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 24px 32px 18px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  #header-left .eyebrow { font-size: 10px; letter-spacing: 4px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+  #header-left .title { font-size: 22px; font-weight: bold; letter-spacing: -0.5px; color: var(--accent); margin-bottom: 6px; transition: color .3s; }
+  #header-left .credits { font-size: 10px; color: var(--text-dim); display: flex; gap: 20px; }
+  #header-left .credits span span { color: var(--text-mid); margin-left: 4px; }
+  #header-right { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  /* Buttons */
+  .btn { font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; padding: 6px 14px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); transition: color .2s, border-color .2s, background .2s; }
+  .btn:hover { color: var(--accent); border-color: var(--accent); }
+  .btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: bold; font-size: 10px; }
+  .btn.danger { color: var(--error); border-color: var(--error); }
+  .btn-theme { font-size: 14px; padding: 6px 10px; margin-right: 6px; }
+  /* Main */
+  #main { padding: 24px 32px; max-width: 840px; margin: 0 auto; }
+  /* Form */
+  #form-box {
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    background: var(--surface);
+    transition: background .5s;
+  }
+  #form-box.flash { background: #1a1200; }
+  .light #form-box.flash { background: #fff8e8; }
+  .form-title { font-size: 10px; letter-spacing: 3px; color: var(--accent); margin-bottom: 16px; text-transform: uppercase; }
+  .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; }
+  label { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; }
+  input[type=text], input[type=date], input[type=time], input[type=number] {
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    width: 100%;
+    transition: background .3s, border-color .3s, color .3s;
+  }
+  input:focus { border-color: var(--accent); }
+  /* Break section */
+  .break-section {
+    background: var(--surface-alt);
+    border: 1px solid var(--border-subtle);
+    padding: 12px 14px;
+    margin: 12px 0;
+  }
+  .break-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+  .break-header.has-fields { margin-bottom: 10px; }
+  .break-label { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  .checkbox-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+  .checkbox-label input { accent-color: var(--accent); cursor: pointer; }
+  /* Preview */
+  .preview { font-size: 11px; color: var(--text-dim); margin: 10px 0 12px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .preview .val { color: var(--text-mid); }
+  .preview .eff { color: var(--accent); font-weight: bold; }
+  .preview .eff.bad { color: var(--error); }
+  #form-error { font-size: 11px; color: var(--error); margin-bottom: 10px; }
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-box { border: 1px solid var(--border); padding: 16px 20px; background: var(--surface); }
+  .stat-label { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; }
+  .stat-value { font-size: 28px; color: var(--accent); font-weight: bold; }
+  .totals-bar { border: 1px solid var(--border-subtle); padding: 12px 20px; margin-bottom: 20px; display: flex; gap: 28px; font-size: 11px; flex-wrap: wrap; }
+  .totals-bar span { color: var(--text-dim); }
+  .totals-bar span b { color: var(--text-mid); font-weight: normal; }
+  .totals-bar span.eff b { color: var(--accent); font-weight: bold; }
+  /* Colorist rows */
+  .colorist-row { border-bottom: 1px solid var(--border-faint); padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+  .colorist-name { font-size: 13px; color: var(--text); }
+  .colorist-count { font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+  .colorist-right { display: flex; gap: 20px; align-items: center; }
+  .colorist-dec { font-size: 11px; color: var(--text-dim); }
+  .colorist-hrs { font-size: 15px; color: var(--accent); min-width: 64px; text-align: right; }
+  .bar-track { width: 90px; height: 3px; background: var(--border-subtle); }
+  .bar-fill { height: 100%; background: var(--accent); }
+  /* Session list */
+  .list-header { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .list-header .total { color: var(--accent); }
+  .empty { color: var(--text-ghost); font-size: 12px; text-align: center; padding: 48px 0; border: 1px dashed var(--border-subtle); }
+  .session-row { border-bottom: 1px solid var(--border-faint); padding: 14px 0; display: grid; grid-template-columns: 1fr auto auto auto 32px; align-items: center; gap: 16px; transition: opacity .2s; }
+  .session-row.deleting { opacity: .3; }
+  .session-name { font-size: 13px; color: var(--text); }
+  .session-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+  .session-sub .dot { margin: 0 5px; color: var(--text-ghost); }
+  .session-break { font-size: 10px; color: var(--text-dim); text-align: center; min-width: 140px; }
+  .session-break .no-break { color: var(--text-ghost); }
+  .session-break .brk-faint { color: var(--text-faint); }
+  .session-bruto { font-size: 11px; color: var(--strike); text-decoration: line-through; text-align: right; }
+  .session-eff { font-size: 14px; color: var(--accent); font-weight: bold; text-align: right; min-width: 52px; }
+  .del-btn { background: none; border: none; color: var(--text-ghost); cursor: pointer; font-size: 15px; padding: 0; font-family: inherit; transition: color .2s; }
+  .del-btn.confirm { color: var(--error); }
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    padding: 10px 24px; font-size: 11px; letter-spacing: 2px;
+    z-index: 100; white-space: nowrap; display: none;
+    border: 1px solid var(--ok-text); background: var(--ok-bg); color: var(--ok-text);
+  }
+  #toast.err { border-color: var(--error); background: #1a0a0a; color: var(--error); }
+  .light #toast.err { background: #fef0f0; }
+  /* Modal */
+  #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 200; }
+  #modal-overlay.open { display: flex; }
+  #modal { background: var(--surface); border: 1px solid var(--border); padding: 28px 32px; max-width: 380px; width: 90%; }
+  .modal-title { font-size: 10px; letter-spacing: 3px; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; }
+  .modal-body { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+  .modal-body strong { color: var(--accent); }
+  .modal-hint { font-size: 11px; color: var(--text-dim); margin-bottom: 20px; }
+  .modal-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div id="header-left">
+    <div class="eyebrow">sala de color · película</div>
+    <div class="title">CONTRA EL HURACÁN</div>
+    <div class="credits">
+      <span>DP <span>Alex de Pablo</span></span>
+      <span>COLOR <span>Fernando Medellín</span></span>
+    </div>
+  </div>
+  <div id="header-right">
+    <button class="btn btn-theme" id="btn-theme" title="Cambiar tema" onclick="toggleTheme()">☀</button>
+    <button class="btn active" id="btn-log" onclick="setView('log')">Log</button>
+    <button class="btn" id="btn-resumen" onclick="setView('resumen')">Resumen</button>
+    <button class="btn" id="btn-csv" onclick="exportCSV()" style="margin-left:6px;display:none">↓ CSV</button>
+    <button class="btn" id="btn-json" onclick="exportJSON()" style="display:none">↓ JSON</button>
+    <button class="btn" onclick="document.getElementById('file-input').click()">↑ Restaurar</button>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleImport(event)">
+  </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Form -->
+  <div id="form-box">
+    <div class="form-title">Nueva Sesión</div>
+    <div class="grid-2">
+      <div class="field"><label>Colorista</label><input type="text" id="f-colorista" value="Fernando Medellín" onkeydown="if(event.key==='Enter')addSession()"></div>
+      <div class="field"><label>Fecha</label><input type="date" id="f-fecha"></div>
+    </div>
+    <div class="grid-2-eq">
+      <div class="field"><label>Inicio sesión</label><input type="time" id="f-inicio" value="09:00" oninput="updatePreview()"></div>
+      <div class="field"><label>Fin sesión</label><input type="time" id="f-fin" value="18:00" oninput="updatePreview()"></div>
+    </div>
+    <div class="break-section">
+      <div class="break-header" id="break-header">
+        <span class="break-label">Corte de comida</span>
+        <label class="checkbox-label"><input type="checkbox" id="f-sin-corte" onchange="toggleBreak()"> Sin corte</label>
+      </div>
+      <div id="break-fields" class="grid-2-eq" style="margin-top:10px">
+        <div class="field"><label>Salida a comer</label><input type="time" id="f-c-salida" value="14:00" oninput="updatePreview()"></div>
+        <div class="field"><label>Regreso de comer</label><input type="time" id="f-c-regreso" value="15:00" oninput="updatePreview()"></div>
+      </div>
+    </div>
+    <div class="preview" id="preview"></div>
+    <div id="form-error"></div>
+    <button class="btn primary" onclick="addSession()">+ Registrar</button>
+  </div>
+
+  <!-- Resumen -->
+  <div id="view-resumen" style="display:none">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Sesiones</div><div class="stat-value" id="s-count">0</div></div>
+      <div class="stat-box"><div class="stat-label">Horas efectivas</div><div class="stat-value" id="s-hrs">—</div></div>
+      <div class="stat-box"><div class="stat-label">Coloristas</div><div class="stat-value" id="s-col">0</div></div>
+    </div>
+    <div class="totals-bar" id="totals-bar" style="display:none">
+      <span>Bruto total: <b id="t-bruto"></b></span>
+      <span>Cortes: <b id="t-corte"></b></span>
+      <span class="eff">Efectivo: <b id="t-eff"></b></span>
+    </div>
+    <div id="colorist-list"></div>
+  </div>
+
+  <!-- Log -->
+  <div id="view-log">
+    <div class="list-header">
+      <span id="list-count">Sesiones · 0</span>
+      <span class="total" id="list-total"></span>
+    </div>
+    <div class="empty" id="list-empty">sin sesiones registradas</div>
+    <div id="session-list"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Import modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-title">Restaurar Backup</div>
+    <div class="modal-body">Se encontraron <strong id="modal-count"></strong> sesiones en el archivo.</div>
+    <div class="modal-hint">¿Combinar con las sesiones actuales, o reemplazar todo?</div>
+    <div class="modal-btns">
+      <button class="btn primary" onclick="confirmImport(false)">Combinar</button>
+      <button class="btn danger" onclick="confirmImport(true)">Reemplazar todo</button>
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'sala-color-contra-huracan-v1';
+let sessions = [];
+let currentView = 'log';
+let isDark = true;
+let pendingImport = null;
+let deletingId = null;
+let deleteTimer = null;
+
+// ── Utils ──────────────────────────────────────────────
+function toMins(t) {
+  if (!t) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+function fmtDur(min) {
+  if (min <= 0) return '0m';
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+function decHrs(min) { return (min / 60).toFixed(2); }
+function calcRaw(ini, fin) { return toMins(fin) - toMins(ini); }
+function calcBreak(cs, cr) { if (!cs || !cr) return 0; const d = toMins(cr) - toMins(cs); return d > 0 ? d : 0; }
+function calcEff(ini, fin, cs, cr) { return calcRaw(ini, fin) - calcBreak(cs, cr); }
+function totalMins() { return sessions.reduce((a, s) => a + s.duration, 0); }
+function groupByCol() {
+  const m = {};
+  sessions.forEach(s => { m[s.colorista] = (m[s.colorista] || 0) + s.duration; });
+  return m;
+}
+function today() { return new Date().toISOString().slice(0, 10); }
+
+// ── Storage ────────────────────────────────────────────
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); }
+function load() {
+  try { const d = localStorage.getItem(STORAGE_KEY); if (d) sessions = JSON.parse(d); }
+  catch (_) { sessions = []; }
+}
+
+// ── Toast ──────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type === 'err' ? 'err' : '';
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+// ── Theme ──────────────────────────────────────────────
+function toggleTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('light', !isDark);
+  document.getElementById('btn-theme').textContent = isDark ? '☀' : '☾';
+  // Fix color scheme on inputs
+  document.querySelectorAll('input').forEach(i => i.style.colorScheme = isDark ? 'dark' : 'light');
+}
+
+// ── View ───────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.getElementById('view-log').style.display = v === 'log' ? 'block' : 'none';
+  document.getElementById('view-resumen').style.display = v === 'resumen' ? 'block' : 'none';
+  document.getElementById('form-box').style.display = v === 'log' ? 'block' : 'none';
+  document.getElementById('btn-log').classList.toggle('active', v === 'log');
+  document.getElementById('btn-resumen').classList.toggle('active', v === 'resumen');
+  if (v === 'resumen') renderResumen();
+}
+
+// ── Break toggle ───────────────────────────────────────
+function toggleBreak() {
+  const sinCorte = document.getElementById('f-sin-corte').checked;
+  const fields = document.getElementById('break-fields');
+  const header = document.getElementById('break-header');
+  fields.style.display = sinCorte ? 'none' : 'grid';
+  header.classList.toggle('has-fields', !sinCorte);
+  updatePreview();
+}
+
+// ── Preview ────────────────────────────────────────────
+function updatePreview() {
+  const ini = document.getElementById('f-inicio').value;
+  const fin = document.getElementById('f-fin').value;
+  const sinCorte = document.getElementById('f-sin-corte').checked;
+  const cs = document.getElementById('f-c-salida').value;
+  const cr = document.getElementById('f-c-regreso').value;
+  const el = document.getElementById('preview');
+  if (!ini || !fin) { el.innerHTML = ''; return; }
+  const raw = calcRaw(ini, fin);
+  if (raw <= 0) { el.innerHTML = ''; return; }
+  const brk = sinCorte ? 0 : calcBreak(cs, cr);
+  const eff = raw - brk;
+  let html = `<span>bruto: <span class="val">${fmtDur(raw)}</span></span>`;
+  if (brk > 0) html += `<span>comida: <span class="val">${cs} → ${cr} (−${fmtDur(brk)})</span></span>`;
+  html += `<span>efectivo: <span class="eff${eff <= 0 ? ' bad' : ''}">${eff > 0 ? fmtDur(eff) : '—'}</span></span>`;
+  el.innerHTML = html;
+}
+
+// ── Add session ────────────────────────────────────────
+function addSession() {
+  const errEl = document.getElementById('form-error');
+  errEl.textContent = '';
+  const colorista = document.getElementById('f-colorista').value.trim();
+  const fecha = document.getElementById('f-fecha').value;
+  const ini = document.getElementById('f-inicio').value;
+  const fin = document.getElementById('f-fin').value;
+  const sinCorte = document.getElementById('f-sin-corte').checked;
+  const cs = sinCorte ? '' : document.getElementById('f-c-salida').value;
+  const cr = sinCorte ? '' : document.getElementById('f-c-regreso').value;
+
+  if (!colorista) { errEl.textContent = '⚠ Ingresa el nombre del colorista.'; return; }
+  if (!fecha) { errEl.textContent = '⚠ Ingresa la fecha.'; return; }
+  const raw = calcRaw(ini, fin);
+  if (raw <= 0) { errEl.textContent = '⚠ La hora de fin debe ser mayor que la de inicio.'; return; }
+  if (!sinCorte) {
+    const brk = calcBreak(cs, cr);
+    if (brk <= 0) { errEl.textContent = '⚠ La hora de regreso debe ser mayor que la de salida.'; return; }
+  }
+  const duration = calcEff(ini, fin, cs, cr);
+  if (duration <= 0) { errEl.textContent = '⚠ El corte de comida es mayor que la sesión.'; return; }
+
+  sessions.unshift({ id: Date.now(), colorista, fecha, inicio: ini, fin, cSalida: cs, cRegreso: cr, duration });
+  save();
+
+  // Flash
+  const box = document.getElementById('form-box');
+  box.classList.add('flash');
+  setTimeout(() => box.classList.remove('flash'), 700);
+
+  // Reset
+  document.getElementById('f-colorista').value = 'Fernando Medellín';
+  document.getElementById('f-inicio').value = '09:00';
+  document.getElementById('f-fin').value = '18:00';
+  document.getElementById('f-c-salida').value = '14:00';
+  document.getElementById('f-c-regreso').value = '15:00';
+  document.getElementById('f-sin-corte').checked = false;
+  document.getElementById('break-fields').style.display = 'grid';
+  updatePreview();
+  updateHeaderBtns();
+  renderLog();
+}
+
+// ── Delete ─────────────────────────────────────────────
+function deleteSession(id) {
+  if (deletingId === id) {
+    sessions = sessions.filter(s => s.id !== id);
+    save();
+    deletingId = null;
+    clearTimeout(deleteTimer);
+    updateHeaderBtns();
+    renderLog();
+    if (currentView === 'resumen') renderResumen();
+  } else {
+    if (deletingId !== null) {
+      const old = document.querySelector(`.del-btn[data-id="${deletingId}"]`);
+      if (old) { old.textContent = '·'; old.classList.remove('confirm'); }
+    }
+    deletingId = id;
+    const btn = document.querySelector(`.del-btn[data-id="${id}"]`);
+    if (btn) { btn.textContent = '✕'; btn.classList.add('confirm'); }
+    clearTimeout(deleteTimer);
+    deleteTimer = setTimeout(() => {
+      deletingId = null;
+      const b = document.querySelector(`.del-btn[data-id="${id}"]`);
+      if (b) { b.textContent = '·'; b.classList.remove('confirm'); }
+    }, 3000);
+  }
+}
+
+// ── Render log ─────────────────────────────────────────
+function renderLog() {
+  const total = totalMins();
+  document.getElementById('list-count').textContent = `Sesiones · ${sessions.length}`;
+  document.getElementById('list-total').textContent = sessions.length ? `${fmtDur(total)} efectivas` : '';
+  const empty = document.getElementById('list-empty');
+  const list = document.getElementById('session-list');
+  if (sessions.length === 0) { empty.style.display = 'block'; list.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = sessions.map(s => {
+    const brk = calcBreak(s.cSalida, s.cRegreso);
+    const rawDur = calcRaw(s.inicio, s.fin);
+    const brkHtml = brk > 0
+      ? `${s.cSalida} → ${s.cRegreso} <span class="brk-faint">(−${fmtDur(brk)})</span>`
+      : `<span class="no-break">sin corte</span>`;
+    return `
+      <div class="session-row" id="row-${s.id}">
+        <div>
+          <div class="session-name">${esc(s.colorista)}</div>
+          <div class="session-sub">${s.fecha}<span class="dot">·</span>${s.inicio} → ${s.fin}</div>
+        </div>
+        <div class="session-break">${brkHtml}</div>
+        <div class="session-bruto">${fmtDur(rawDur)}</div>
+        <div class="session-eff">${fmtDur(s.duration)}</div>
+        <button class="del-btn" data-id="${s.id}" onclick="deleteSession(${s.id})" title="Borrar">·</button>
+      </div>`;
+  }).join('');
+}
+
+// ── Render resumen ─────────────────────────────────────
+function renderResumen() {
+  const total = totalMins();
+  const by = groupByCol();
+  document.getElementById('s-count').textContent = sessions.length;
+  document.getElementById('s-hrs').textContent = sessions.length ? fmtDur(total) : '—';
+  document.getElementById('s-col').textContent = Object.keys(by).length;
+
+  const bar = document.getElementById('totals-bar');
+  if (sessions.length > 0) {
+    bar.style.display = 'flex';
+    const totalBruto = sessions.reduce((a, s) => a + calcRaw(s.inicio, s.fin), 0);
+    const totalCorte = sessions.reduce((a, s) => a + calcBreak(s.cSalida, s.cRegreso), 0);
+    document.getElementById('t-bruto').textContent = fmtDur(totalBruto);
+    document.getElementById('t-corte').textContent = `−${fmtDur(totalCorte)}`;
+    document.getElementById('t-eff').textContent = fmtDur(total);
+  } else { bar.style.display = 'none'; }
+
+  const colList = document.getElementById('colorist-list');
+  if (Object.keys(by).length === 0) { colList.innerHTML = '<div style="color:var(--text-faint);font-size:12px;text-align:center;padding:40px 0">sin sesiones registradas</div>'; return; }
+  colList.innerHTML = Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([name, mins]) => {
+    const count = sessions.filter(s => s.colorista === name).length;
+    const pct = total > 0 ? (mins / total * 100) : 0;
+    return `
+      <div class="colorist-row">
+        <div><div class="colorist-name">${esc(name)}</div><div class="colorist-count">${count} sesión${count!==1?'es':''}</div></div>
+        <div class="colorist-right">
+          <span class="colorist-dec">${decHrs(mins)}h</span>
+          <span class="colorist-hrs">${fmtDur(mins)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Header buttons ─────────────────────────────────────
+function updateHeaderBtns() {
+  const has = sessions.length > 0;
+  document.getElementById('btn-csv').style.display = has ? '' : 'none';
+  document.getElementById('btn-json').style.display = has ? '' : 'none';
+}
+
+// ── Export CSV ─────────────────────────────────────────
+function exportCSV() {
+  const header = ['#','Proyecto','Colorista','DP','Fecha','Inicio','Fin','Salida comida','Regreso comida','Corte (min)','Bruto','Efectivo','Horas decimales'];
+  const rows = [...sessions].reverse().map((s, i) => [
+    i+1, 'Contra el Huracán', s.colorista, 'Alex de Pablo', s.fecha, s.inicio, s.fin,
+    s.cSalida||'—', s.cRegreso||'—', calcBreak(s.cSalida,s.cRegreso),
+    fmtDur(calcRaw(s.inicio,s.fin)), fmtDur(s.duration), decHrs(s.duration)
+  ]);
+  download([header,...rows].map(r=>r.join(',')).join('\n'), 'sala_color_contra_el_huracan.csv', 'text/csv;charset=utf-8;');
+}
+
+// ── Export JSON ────────────────────────────────────────
+function exportJSON() {
+  const backup = {
+    meta: { proyecto:'Contra el Huracán', dp:'Alex de Pablo', exportado:new Date().toISOString(), version:STORAGE_KEY, total_sesiones:sessions.length, total_horas_efectivas:decHrs(totalMins()) },
+    sesiones: [...sessions].reverse()
+  };
+  const fecha = new Date().toISOString().slice(0,10);
+  download(JSON.stringify(backup, null, 2), `backup_sala_color_contra_el_huracan_${fecha}.json`, 'application/json');
+  showToast('Backup JSON descargado ✓');
+}
+
+function download(content, filename, type) {
+  const blob = new Blob([content], {type});
+  const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:filename});
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ── Import ─────────────────────────────────────────────
+function handleImport(e) {
+  const file = e.target.files?.[0]; if (!file) return; e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      const sesiones = Array.isArray(parsed) ? parsed : parsed.sesiones;
+      if (!Array.isArray(sesiones)) throw new Error('Formato inválido');
+      for (const s of sesiones)
+        if (!s.id || !s.colorista || !s.fecha || !s.inicio || !s.fin || s.duration === undefined)
+          throw new Error('Campos faltantes');
+      pendingImport = [...sesiones].sort((a,b)=>b.id-a.id);
+      document.getElementById('modal-count').textContent = pendingImport.length;
+      document.getElementById('modal-overlay').classList.add('open');
+    } catch(err) { showToast(`Error: ${err.message}`, 'err'); }
+  };
+  reader.readAsText(file);
+}
+
+function confirmImport(replace) {
+  if (replace) {
+    sessions = pendingImport;
+  } else {
+    const ids = new Set(sessions.map(s=>s.id));
+    sessions = [...pendingImport.filter(s=>!ids.has(s.id)), ...sessions].sort((a,b)=>b.id-a.id);
+  }
+  save(); closeModal();
+  showToast(`Backup restaurado · ${pendingImport.length} sesiones`);
+  pendingImport = null;
+  updateHeaderBtns(); renderLog();
+  if (currentView === 'resumen') renderResumen();
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+// Click outside modal
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Init ───────────────────────────────────────────────
+load();
+document.getElementById('f-fecha').value = today();
+document.getElementById('break-header').classList.add('has-fields');
+updatePreview();
+updateHeaderBtns();
+renderLog();
+
+// Set color scheme on inputs
+document.querySelectorAll('input').forEach(i => i.style.colorScheme = 'dark');
+</script>
+</body>
+</html>
