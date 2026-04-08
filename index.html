@@ -3,74 +3,321 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contra el Huracán · Post</title>
+<title>Post X · Room Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;800&family=PT+Mono&display=swap" rel="stylesheet">
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0a0a0b;
-    --surface: #111113;
-    --border: #1e1e22;
-    --text: #e0d8cc;
-    --text-dim: #444;
-    --text-mid: #666;
-    --color: #f0a030;
-    --vfx: #20c080;
+    --bg:        #071618;
+    --bg-mid:    #0D2226;
+    --bg-card:   #113338;
+    --cyan-hi:   #C0EBEF;
+    --cyan-mid:  #97DDE4;
+    --cyan-lo:   #E9F9FA;
+    --orange:    #E66221;
+    --text:      #E9F9FA;
+    --text-dim:  #97DDE4;
+    --text-faint:#2a4a50;
+    --border:    #1a3a40;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+  }
+
   body {
-    font-family: 'Courier New', monospace;
+    font-family: 'PT Mono', monospace;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+
+  /* ── Noise overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* PostX SVG Logo */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    text-decoration: none;
+  }
+  .logo-text {
+    font-family: 'Funnel Display', sans-serif;
+    font-weight: 300;
+    font-size: 22px;
+    color: var(--cyan-hi);
+    letter-spacing: -0.5px;
+  }
+  .logo-icon {
+    margin-left: 6px;
+  }
+
+  .header-tag {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  /* ── Main ── */
+  main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px;
+    padding: 60px 32px;
   }
-  .eyebrow { font-size: 10px; letter-spacing: 5px; color: var(--text-dim); text-transform: uppercase; text-align: center; margin-bottom: 12px; }
-  h1 { font-size: clamp(28px, 6vw, 52px); font-weight: bold; letter-spacing: -1px; color: var(--text); text-align: center; margin-bottom: 6px; line-height: 1.1; }
-  .subtitle { font-size: 11px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; text-align: center; margin-bottom: 64px; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; width: 100%; max-width: 620px; }
-  .card { display: block; text-decoration: none; border: 1px solid var(--border); padding: 28px 28px 24px; background: var(--surface); transition: border-color .2s, transform .15s; position: relative; overflow: hidden; }
-  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--card-accent); transform: scaleX(0); transform-origin: left; transition: transform .25s; }
-  .card:hover { border-color: var(--card-accent); transform: translateY(-2px); }
-  .card:hover::before { transform: scaleX(1); }
-  .card-color { --card-accent: var(--color); }
-  .card-vfx   { --card-accent: var(--vfx); }
-  .card-icon { font-size: 28px; margin-bottom: 16px; display: block; }
-  .card-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--card-accent); margin-bottom: 8px; }
-  .card-title { font-size: 18px; font-weight: bold; color: var(--text); margin-bottom: 10px; letter-spacing: -.3px; }
-  .card-desc { font-size: 11px; color: var(--text-mid); line-height: 1.6; letter-spacing: .3px; }
-  .card-arrow { position: absolute; bottom: 24px; right: 24px; font-size: 16px; color: var(--border); transition: color .2s, transform .2s; }
-  .card:hover .card-arrow { color: var(--card-accent); transform: translate(2px, -2px); }
-  footer { margin-top: 56px; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; text-align: center; }
+
+  /* Decorative line */
+  .deco-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, var(--cyan-mid));
+    margin-bottom: 32px;
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Funnel Display', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 7vw, 64px);
+    color: var(--text);
+    text-align: center;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  h1 span {
+    color: var(--orange);
+  }
+
+  .subtitle {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .subtitle b {
+    color: var(--text-dim);
+    font-weight: normal;
+  }
+
+  /* ── Cards ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    width: 100%;
+    max-width: 640px;
+    border: 1px solid var(--border);
+    background: var(--border);
+  }
+
+  .card {
+    display: block;
+    text-decoration: none;
+    padding: 32px 32px 28px;
+    background: var(--bg-card);
+    position: relative;
+    overflow: hidden;
+    transition: background .2s;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--card-glow) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .card:hover { background: var(--bg-mid); }
+  .card:hover::after { opacity: 1; }
+
+  .card-color { --card-glow: rgba(192,235,239,.04); }
+  .card-vfx   { --card-glow: rgba(230,98,33,.04); }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .card-pill {
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--pill-color);
+    color: var(--pill-color);
+  }
+  .card-color .card-pill { --pill-color: var(--cyan-mid); }
+  .card-vfx   .card-pill { --pill-color: var(--orange); }
+
+  .card-arrow {
+    font-size: 18px;
+    color: var(--text-faint);
+    transition: color .2s, transform .2s;
+    position: relative;
+    z-index: 1;
+  }
+  .card:hover .card-arrow {
+    color: var(--cyan-hi);
+    transform: translate(3px, -3px);
+  }
+  .card-vfx:hover .card-arrow { color: var(--orange); }
+
+  .card-title {
+    font-family: 'Funnel Display', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-desc {
+    font-size: 10px;
+    color: var(--text-faint);
+    line-height: 1.7;
+    letter-spacing: .5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-bottom {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Footer ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-left {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .footer-right {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+  .footer-right span {
+    color: var(--cyan-mid);
+  }
 </style>
 </head>
 <body>
 
+<header>
+  <a class="logo" href="/">
+    <span class="logo-text">Post</span>
+    <!-- PostX icon reconstructed in SVG -->
+    <svg class="logo-icon" width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 2 L10 11 L2 20" stroke="#C0EBEF" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <path d="M8 2 L16 11 L8 20" stroke="#C0EBEF" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <path d="M30 2 L22 11 L30 20" stroke="#C0EBEF" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <path d="M24 2 L16 11 L24 20" stroke="#C0EBEF" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+    </svg>
+  </a>
+  <div class="header-tag">Room Tracker · cehroom.postx.mx</div>
+</header>
+
+<main>
+  <div class="deco-line"></div>
   <div class="eyebrow">registro de salas · postproducción</div>
-  <h1>CONTRA EL HURACÁN</h1>
-  <div class="subtitle">DP Alex de Pablo &nbsp;·&nbsp; Color Fernando Medellín</div>
+  <h1>CONTRA EL <span>HURACÁN</span></h1>
+  <div class="subtitle">
+    DP <b>Alex de Pablo</b> &nbsp;·&nbsp; Color <b>Fernando Medellín</b>
+  </div>
 
   <div class="cards">
     <a class="card card-color" href="color.html">
-      <span class="card-icon">🎨</span>
-      <div class="card-tag">Sala de Color</div>
-      <div class="card-title">Color Suite Log</div>
+      <div class="card-top">
+        <div class="card-pill">Sala de Color</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div class="card-title">Color Suite</div>
       <div class="card-desc">Registro de sesiones de color. Horarios, cortes de comida y horas efectivas por colorista.</div>
-      <span class="card-arrow">↗</span>
+      <div class="card-bottom">color.html · Supabase</div>
     </a>
 
     <a class="card card-vfx" href="vfx.html">
-      <span class="card-icon">⚡</span>
-      <div class="card-tag">Sala VFX</div>
-      <div class="card-title">VFX Suite Log</div>
+      <div class="card-top">
+        <div class="card-pill">Sala VFX</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div class="card-title">VFX Suite</div>
       <div class="card-desc">Registro de sesiones de efectos visuales. Horarios, cortes de comida y horas efectivas.</div>
-      <span class="card-arrow">↗</span>
+      <div class="card-bottom">vfx.html · Supabase</div>
     </a>
   </div>
+</main>
 
-  <footer>Contra el Huracán &nbsp;·&nbsp; 2025</footer>
+<footer>
+  <div class="footer-left">Post X · MX · 2026</div>
+  <div class="footer-right">Contra el Huracán &nbsp;·&nbsp; <span>cehroom.postx.mx</span></div>
+</footer>
 
 </body>
 </html>
